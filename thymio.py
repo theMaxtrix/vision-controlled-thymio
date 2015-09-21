@@ -91,8 +91,8 @@ def __getGetThymioNetwork():
 
 if __name__ == '__main__':
 
-    thymio = init()
-    setRight(0)
+    init()
+    setRight(10)
     setLeft(0)
     while True:
         print getProxSensors() 
