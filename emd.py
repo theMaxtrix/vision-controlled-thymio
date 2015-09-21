@@ -4,12 +4,9 @@ import picamera
 import picamera.array 
 import numpy as np
 import scipy.misc
-import os
 import _raspClient
 #import matplotlib.pyplot as plt 
 
-def clear():
-    os.system(["clear","cls"][os.name == "nt"])
 #clear = lambda: os.system("cls")
 #import cProfile
 

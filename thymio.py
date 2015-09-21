@@ -16,56 +16,29 @@ def setLeft(value):
 def setRight(value):
     network.SetVariable("thymio-II", "motor.right.target", [value])
 
+
 def getProxSensors():
     return network.GetVariable("thymio-II", "prox.horizontal")
+    # prox.horizontal[0] : front left
+    # prox.horizontal[1] : front middle-left
+    # prox.horizontal[2] : front middle
+    # prox.horizontal[3] : front middle-right
+    # prox.horizontal[4] : front right
+    # prox.horizontal[5] : back left
+    # prox.horizontal[6] : back right
 
-def __Braitenberg():
-    #get the values of the sensors
-    network.GetVariable("thymio-II", "prox.horizontal",reply_handler=__get_variables_reply,error_handler=__get_variables_error)
- 
-    #print the proximity sensors value in the terminal
-    print proxSensorsVal[0],proxSensorsVal[1],proxSensorsVal[2],proxSensorsVal[3],proxSensorsVal[4]
- 
-    #Parameters of the Braitenberg, to give weight to each wheels
-    leftWheel=[-0.01,-0.005,-0.0001,0.006,0.015]
-    rightWheel=[0.012,+0.007,-0.0002,-0.0055,-0.011]
- 
-    #Braitenberg algorithmr
-    totalLeft=0
-    totalRight=0
-    for i in range(5):
-         totalLeft=totalLeft+(proxSensorsVal[i]*leftWheel[i])
-         totalRight=totalRight+(proxSensorsVal[i]*rightWheel[i])
- 
-    #add a constant speed to each wheels so the robot moves always forward
-    totalRight=totalRight+50
-    totalLeft=totalLeft+50
+def getMicSensors():
+    return network.GetVariable("thymio-II", "mic.intensity")
 
-    totalRight = 0
-    totalLeft = 0
- 
-    #print in terminal the values that is sent to each motor
-    print "totalLeft"
-    print totalLeft
-    print "totalRight"
-    print totalRight
- 
-    #send motor value to the robot
-    network.SetVariable("thymio-II", "motor.left.target", [totalLeft])
-    network.SetVariable("thymio-II", "motor.right.target", [totalRight])    
- 
-    return True
-def __variableParser(r):
-    return r
+def getGroundSensorA():
+    # 0 - Left
+    # 1 - Right 
+    return network.GetVariable("thymio-II", "prox.ground.ambiant")
 
-def __get_variables_reply(r):
-    global proxSensorsVal
-    proxSensorsVal=r
- 
-def __get_variables_error(e):
-    print 'error:'
-    print str(e)
-    loop.quit()
+def getGroundSensorR():
+    # 0 - Left
+    # 1 - Right 
+    return network.GetVariable("thymio-II", "prox.ground.reflected")
 
 def __getGetThymioNetwork():
     parser = OptionParser()
@@ -84,7 +57,7 @@ def __getGetThymioNetwork():
     network = dbus.Interface(bus.get_object('ch.epfl.mobots.Aseba', '/'), dbus_interface='ch.epfl.mobots.AsebaNetwork')
  
     #print in the terminal the name of each Aseba NOde
-    print network.GetNodesList()
+    print "This is the node you are looking for: " + str(network.GetNodesList())
 
     return network
 
@@ -92,10 +65,18 @@ def __getGetThymioNetwork():
 if __name__ == '__main__':
 
     init()
-    setRight(10)
-    setLeft(0)
+    
     while True:
-        print getProxSensors() 
+        groundSensors = getGroundSensorR()
+        if groundSensors[0] < 100 or groundSensors[1] < 100:
+            setRight(0)
+            setLeft(0)
+        else:
+            print getMicSensors()
+            setRight(50)
+            setLeft(50)
+        #print getGroundSensorR() 
+        #print getGroundSensorA() [0]
     #delayed = 1
     #delayedImg = "test"
     #camerSetup

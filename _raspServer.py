@@ -40,7 +40,6 @@ if __name__ == '__main__':
         #image = np.hstack((image,-image))
         print image.shape
         cv2.imshow("outPut", image)
-
         cv2.waitKey(1)
         #plt.imshow(image)
         #plt.show()

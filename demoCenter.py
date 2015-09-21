@@ -8,10 +8,10 @@ import numpy as np
 import scipy.misc
 import os
 import _raspClient
-
+import _div 
 
 if __name__ == '__main__':
-    network = thymio.getGetThymioNetwork()
+    thymio.init()
     #sock = _raspClient.initSocket('192.168.86.98')
 
     with picamera.PiCamera() as camera:
@@ -27,21 +27,31 @@ if __name__ == '__main__':
                 current = emd.getReceptiveFields(stream.array, nOCellsX = 50, nOCellsY = 50)
                 motionX = emd.getMotionX(delayed, current)
                 delayed = current
-                
-                emd.clear()
                 movementLeft = (-motionX[0:motionX.shape[0],0:motionX.shape[1]/2]).clip(min = 0)
                 movementRight = motionX[0:motionX.shape[0],motionX.shape[1]/2:motionX.shape[1]].clip(min = 0)
 
                 meanLeft = np.mean(movementLeft)
                 meanRight = np.mean(movementRight)
-                speed = 5000
 
-                emd.clear()
-                print("left: %.3f, right: %.3f" % (meanLeft,meanRight))
+                baseSpeed = 50
+                turnSpeed = 100
+
+                _div.clear()
+                groundSensors = thymio.getGroundSensorR()
+                if groundSensors[0] < 100 or groundSensors[1] < 100:
+                    print("Warning Thymio is about to fall from the table")
+                    thymio.setRight(0)
+                    thymio.setLeft(0)
+                else:
+                    print("left: %.3f, right: %.3f" % (meanLeft,meanRight))
+                    leftSpeed = baseSpeed + turnSpeed * (meanLeft/(meanLeft+meanRight))
+                    rightSpeed = baseSpeed + turnSpeed * (meanRight/(meanLeft+meanRight))
+                    thymio.setLeft(leftSpeed)
+                    thymio.setRight(rightSpeed)
 
                 #print motionX
-                network.SetVariable("thymio-II", "motor.left.target", [speed*meanLeft])
-                network.SetVariable("thymio-II", "motor.right.target", [speed*meanRight])
+                #network.SetVariable("thymio-II", "motor.left.target", [speed*meanLeft])
+                #network.SetVariable("thymio-II", "motor.right.target", [speed*meanRight])
 
                 # network.SetVariable("thymio-II", "motor.left.target", [0])
                 # network.SetVariable("thymio-II", "motor.right.target", [0])
