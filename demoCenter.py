@@ -34,8 +34,8 @@ if __name__ == '__main__':
                 meanLeft = np.mean(movementLeft)
                 meanRight = np.mean(movementRight)
 
-                baseSpeed = 0
-                turnSpeed = 50
+                baseSpeed = 50
+                #turnSpeed = 100
 
                 _div.clear()
                 groundSensors = thymio.getGroundSensorR()
@@ -45,10 +45,33 @@ if __name__ == '__main__':
                     thymio.setLeft(0)
                 else:
                     print("left: %.3f, right: %.3f" % (meanLeft,meanRight))
-                    leftSpeed = baseSpeed + (turnSpeed * (meanLeft/(meanLeft+meanRight)))**1.5
-                    rightSpeed = baseSpeed + (turnSpeed * (meanRight/(meanLeft+meanRight)))**1.5
-                    thymio.setLeft(leftSpeed)
-                    thymio.setRight(rightSpeed)
+                    wantedAdjustmentProportionLeft = meanLeft/(meanLeft+meanRight)
+                    wantedAdjustmentProportionRight = meanRight/(meanLeft+meanRight)
+
+                    currentSpeedLeft = thymio.getLeft()
+                    currentSpeedRight = thymio.getRight()
+                    currentSpeedSum = currentSpeedLeft + currentSpeedRight
+
+                    if(currentSpeedSum != 0):
+                        lastAdjustmentProportionLeft = currentSpeedLeft/currentSpeedSum
+                        lastAdjustmentProportionRight = currentSpeedRight/currentSpeedSum
+                    else:
+                        lastAdjustmentProportionLeft = 0.5
+                        lastAdjustmentProportionRight = 0.5
+
+                    # actualAdjustmentProportionLeft = (wantedAdjustmentProportionLeft + lastAdjustmentProportionLeft) / 2
+                    # actualAdjustmentProportionRight = (wantedAdjustmentProportionRight + lastAdjustmentProportionRight) / 2
+
+                    actualAdjustmentProportionLeft = 0.5 + wantedAdjustmentProportionLeft - lastAdjustmentProportionLeft 
+                    actualAdjustmentProportionRight = 0.5 + wantedAdjustmentProportionRight - lastAdjustmentProportionRight 
+
+                    # leftSpeed = baseSpeed + (turnSpeed * (meanLeft/(meanLeft+meanRight)))**1.5
+                    # rightSpeed = baseSpeed + (turnSpeed * (meanRight/(meanLeft+meanRight)))**1.5
+
+                    # thymio.setLeft(leftSpeed)
+                    # thymio.setRight(rightSpeed)
+                    thymio.setLeft(baseSpeed * actualAdjustmentProportionLeft * 2)
+                    thymio.setRight(baseSpeed * actualAdjustmentProportionRight * 2)
 
                 #print motionX
                 #network.SetVariable("thymio-II", "motor.left.target", [speed*meanLeft])

@@ -2,6 +2,7 @@ import dbus
 import dbus.mainloop.glib
 import gobject
 from optparse import OptionParser
+from _div import clear
  
 proxSensorsVal=[0,0,0,0,0]
 network = 0
@@ -16,6 +17,22 @@ def setLeft(value):
 def setRight(value):
     network.SetVariable("thymio-II", "motor.right.target", [value])
 
+def setBothS(left, right):
+    groundSensors = getGroundSensorR()
+    while groundSensors[0] < 100 or groundSensors[1] < 100:
+        clear()
+        print("Warning: Thymio is about to fall from the table")
+        setRight(0)
+        setLeft(0) 
+        groundSensors = getGroundSensorR()
+    setRight(right)
+    setLeft(left) 
+
+def getLeft():
+    return network.GetVariable("thymio-II", "motor.left.speed")[0]
+
+def getRight():
+    return network.GetVariable("thymio-II", "motor.right.speed")[0]
 
 def getProxSensors():
     return network.GetVariable("thymio-II", "prox.horizontal")
@@ -72,9 +89,10 @@ if __name__ == '__main__':
             setRight(0)
             setLeft(0)
         else:
-            print getMicSensors()
+            #print getMicSensors()
             setRight(50)
             setLeft(50)
+            print getRight()
         #print getGroundSensorR() 
         #print getGroundSensorA() [0]
     #delayed = 1
