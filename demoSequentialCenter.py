@@ -2,6 +2,7 @@
 import thymio
 import emd 
 import io
+from time import clock
 from time import sleep
 import picamera
 import picamera.array 
@@ -15,8 +16,8 @@ if __name__ == '__main__':
     thymio.init()
     #sock = _raspClient.initSocket('192.168.86.98')
     speed = 100
-    timeMeasure = 0.01
-    timeTurn = 0.01
+    #timeMeasure = 0.01
+    #timeTurn = 0.01
     with picamera.PiCamera() as camera:
         camera.resolution = (50,50)
         camera.framerate = 60
@@ -26,11 +27,13 @@ if __name__ == '__main__':
             camera.capture(stream, format="yuv")
             stream.truncate(0)
             while True:
-                _div.clear()
+                
+                #_div.clear()
 
                 #FW PHASE
 
-                thymio.setBothS(speed, speed)
+                thymio.setBothSaveWaitUntilReadyAndReturnTime(speed, speed)
+                t0 = clock()
                 # while thymio.getLeft() != speed or thymio.getRight() != speed:
                 #     print thymio.getLeft()
                 #     print thymio.getRight()
@@ -38,7 +41,7 @@ if __name__ == '__main__':
                 image1 = emd.getReceptiveFields(stream.array, nOCellsX = 50, nOCellsY = 50)
                 stream.truncate(0)
 
-                sleep(timeMeasure)
+                #sleep(timeMeasure)
 
                 camera.capture(stream, format="yuv", use_video_port = True)
                 image2 = emd.getReceptiveFields(stream.array, nOCellsX = 50, nOCellsY = 50)
@@ -57,9 +60,20 @@ if __name__ == '__main__':
                 adjustmentProportionLeft = meanLeft/(meanLeft+meanRight)
                 adjustmentProportionRight = meanRight/(meanLeft+meanRight)
 
-                thymio.setBothS(speed * adjustmentProportionLeft * 2, speed * adjustmentProportionRight * 2)
+                t1 = clock()
 
-                sleep(timeTurn)
+                thymio.setBothSaveWaitUntilReadyAndReturnTime(speed * adjustmentProportionLeft * 2, speed * adjustmentProportionRight * 2)
+
+                sleep(t1 -t0)
+                
+                _div.clear()
+
+                print (t1-t0)
+
+                
+
+
+                #sleep(timeTurn)
 
                 # groundSensors = thymio.getGroundSensorR()
                 # if groundSensors[0] < 100 or groundSensors[1] < 100:

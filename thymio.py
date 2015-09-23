@@ -3,6 +3,7 @@ import dbus.mainloop.glib
 import gobject
 from optparse import OptionParser
 from _div import clear
+import time 
  
 proxSensorsVal=[0,0,0,0,0]
 network = 0
@@ -28,11 +29,23 @@ def setBothS(left, right):
     setRight(right)
     setLeft(left) 
 
+def setBothSaveWaitUntilReadyAndReturnTime(left, right):
+    setBothS(left, right)
+    t0 = time.clock()
+    while not(approxEqual(left, getLeft(), 5)) or not(approxEqual(right, getRight(), 5)):
+        #print "waiting for robot"
+        dummy = 0
+
+    return time.clock() - t0
+
 def getLeft():
     return network.GetVariable("thymio-II", "motor.left.speed")[0]
 
 def getRight():
     return network.GetVariable("thymio-II", "motor.right.speed")[0]
+
+def approxEqual(v1, v2, MOE):
+    return v1 <= v2 + MOE and v1 >= v2 - MOE
 
 def getProxSensors():
     return network.GetVariable("thymio-II", "prox.horizontal")
@@ -84,15 +97,15 @@ if __name__ == '__main__':
     init()
     
     while True:
-        groundSensors = getGroundSensorR()
-        if groundSensors[0] < 100 or groundSensors[1] < 100:
-            setRight(0)
-            setLeft(0)
-        else:
-            #print getMicSensors()
-            setRight(50)
-            setLeft(50)
-            print getRight()
+        print setBothSaveWaitUntilReadyAndReturnTime(0, 0)
+        # groundSensors = getGroundSensorR()
+        # if groundSensors[0] < 100 or groundSensors[1] < 100:
+        #     setRight(0)
+        #     setLeft(0)
+        # else:
+        #     #print getMicSensors()
+        #     setRight(50)
+        #     setLeft(50)
         #print getGroundSensorR() 
         #print getGroundSensorA() [0]
     #delayed = 1
