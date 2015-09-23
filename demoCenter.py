@@ -1,3 +1,4 @@
+#asebamedulla "ser:device=/dev/ttyACM0" & python vision-controlled-thymio/demoCenter.py 
 import thymio
 import emd 
 import io
@@ -33,8 +34,8 @@ if __name__ == '__main__':
                 meanLeft = np.mean(movementLeft)
                 meanRight = np.mean(movementRight)
 
-                baseSpeed = 50
-                turnSpeed = 100
+                baseSpeed = 0
+                turnSpeed = 50
 
                 _div.clear()
                 groundSensors = thymio.getGroundSensorR()
@@ -44,8 +45,8 @@ if __name__ == '__main__':
                     thymio.setLeft(0)
                 else:
                     print("left: %.3f, right: %.3f" % (meanLeft,meanRight))
-                    leftSpeed = baseSpeed + turnSpeed * (meanLeft/(meanLeft+meanRight))
-                    rightSpeed = baseSpeed + turnSpeed * (meanRight/(meanLeft+meanRight))
+                    leftSpeed = baseSpeed + (turnSpeed * (meanLeft/(meanLeft+meanRight)))**1.5
+                    rightSpeed = baseSpeed + (turnSpeed * (meanRight/(meanLeft+meanRight)))**1.5
                     thymio.setLeft(leftSpeed)
                     thymio.setRight(rightSpeed)
 
@@ -58,3 +59,4 @@ if __name__ == '__main__':
 
                 #_raspClient.sendImage(np.hstack((movementLeft,movementRight)), sock)
                 stream.truncate(0)
+
